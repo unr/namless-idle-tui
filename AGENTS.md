@@ -1,9 +1,10 @@
 # Coding Agent Instructions for idle-tui
 
 ## Build/Test Commands
-- Install dependencies: `pip install textual textual-web decimal aiosqlite pydantic python-dateutil`
-- Run TUI app: `textual run --dev src/idle_game/app.py`
-- Run web version: `textual-web`
+- Setup: `python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt`
+- Install dev tools: `pip install -r requirements-dev.txt`
+- Run TUI app: `python -m src.idle_game.app`
+- Run web version: `textual serve --port 8080 "python -m src.idle_game.app"`
 - Run tests: `pytest tests/` or single test: `pytest tests/test_game_state.py::test_function_name -v`
 - Format code: `black src/ tests/` and `ruff check --fix src/`
 - Type checking: `mypy src/`

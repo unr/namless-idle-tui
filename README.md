@@ -2,42 +2,46 @@
 
 A terminal-based idle/incremental game built with Python and Textual framework.
 
-**✨ Now with Web Support!** Run the game in your terminal OR in a web browser.
+**✨ Now with Web Support!** Run the game in your terminal OR in a web browser using the latest Textual version.
 
 ## Quick Start
 
-### Terminal Version (Original)
+### Setup
 
 ```bash
-# Install dependencies
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements-simple.txt
+# Clone the repository
+git clone <repository-url>
+cd idle-tui
 
-# Run the game
+# Create virtual environment
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# (Optional) Install development dependencies for web serving
+pip install -r requirements-dev.txt
+```
+
+### Terminal Version (TUI)
+
+Run the game directly in your terminal:
+
+```bash
 python -m src.idle_game.app
 ```
 
-### Web Browser Version (New!)
+### Web Browser Version
+
+Serve the game in your web browser using Textual's built-in server:
 
 ```bash
-# Use Python 3.12.7 for best compatibility
-pyenv local 3.12.7
+# Requires textual-dev to be installed (included in requirements-dev.txt)
+textual serve --port 8080 "python -m src.idle_game.app"
 
-# Create separate environment for web version
-/Users/unr/.pyenv/versions/3.12.7/bin/python3 -m venv venv-web
-source venv-web/bin/activate
-
-# Install web dependencies
-pip install -r requirements-web.txt
-
-# Start web server
-python start_web.py
-
-# Open browser to http://localhost:8000
+# Open browser to http://localhost:8080
 ```
-
-See [textual-readme.md](textual-readme.md) for detailed web setup instructions.
 
 ## Game Controls
 
@@ -69,6 +73,19 @@ Three ways to reset your game:
 - truly a tui -- can run as a local package in your terminal
 - truly a webapp -- can run as a web app as an authenticated user
 - cross progression (same account both web+tui)
+
+## Dependencies
+
+### Production
+- **Textual** 6.4.0+ - Modern TUI framework
+- **aiosqlite** - Async SQLite database
+- **pydantic** - Data validation  
+- **python-dateutil** - Date/time utilities
+
+### Development  
+- **textual-dev** - Includes `textual serve` command for web version
+- **pytest** - Testing framework
+- **black**, **ruff**, **mypy** - Code quality tools
 
 ## Documentation
 
