@@ -1,0 +1,70 @@
+#main-container {
+    align: center middle;
+}
+
+#game-area {
+    width: 60;
+    height: 20;
+    border: solid cyan;
+    padding: 2;
+}
+
+#counter {
+    height: 5;
+    content-align: center middle;
+    margin-bottom: 2;
+}
+
+#click-button {
+    width: 100%;
+    margin-bottom: 1;
+}
+
+#click-button:hover {
+    background: $primary;
+}
+
+#rate-display {
+    content-align: center middle;
+    color: $text-muted;
+}
+
+.notification {
+    background: $success;
+    color: $text;
+    padding: 1;
+}
+
+/* Reset Dialog Styles */
+ConfirmReset {
+    align: center middle;
+}
+
+#reset-dialog {
+    width: 50;
+    height: 11;
+    border: solid red;
+    background: $surface;
+    padding: 1;
+}
+
+#reset-title {
+    text-align: center;
+    text-style: bold;
+    color: red;
+    margin-bottom: 1;
+}
+
+#reset-warning {
+    text-align: center;
+    margin-bottom: 1;
+}
+
+#reset-buttons {
+    align: center middle;
+    height: 3;
+}
+
+#reset-buttons Button {
+    margin: 0 1;
+}

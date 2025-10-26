@@ -1,6 +1,41 @@
-# Nameless Idle Tui
+# Idle TUI Game
 
-A simple incremental idler written in a tui. 
+A terminal-based idle/incremental game built with Python and Textual framework.
+
+## Quick Start
+
+```bash
+# Install dependencies
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements-simple.txt
+
+# Run the game
+python -m src.idle_game.app
+```
+
+## Game Controls
+
+- **Click Button** - Adds +10 resources
+- **s** - Save game (also auto-saves every 10 seconds)
+- **r** - Reset game progress (with confirmation)
+- **q** - Quit
+
+## Reset Progress
+
+Three ways to reset your game:
+
+1. **In-game**: Press 'r' while playing
+2. **Script**: Run `python3 reset_game.py`
+3. **Manual**: Delete `data/game.db`
+
+## Features
+
+- 🔄 Auto-increment resources (1/second)
+- 💾 Persistent saves with SQLite
+- 🌙 Offline progression calculation
+- 🎨 Styled terminal UI
+- 🔢 Large number support with suffixes (K, M, B, T, etc.)
 
 ## Project Goals
 
@@ -9,3 +44,11 @@ A simple incremental idler written in a tui.
 - truly a tui -- can run as a local package in your terminal
 - truly a webapp -- can run as a web app as an authenticated user
 - cross progression (same account both web+tui)
+
+## Documentation
+
+See [COMPLETE.md](COMPLETE.md) for full documentation on:
+- Architecture details
+- How to add new features
+- Troubleshooting
+- Development tips
