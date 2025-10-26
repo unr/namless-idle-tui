@@ -1,8 +1,19 @@
-# Idle TUI Game
+# Nameless Idle TUI Game
 
-A terminal-based idle/incremental game built with Python and Textual framework.
+A terminal-based idle/incremental game built with Python and Textual framework. This is half day dream idea, half learning python + tui + claude code more in my spare time.
 
 **✨ Now with Web Support!** Run the game in your terminal OR in a web browser using the latest Textual version.
+
+## Current State of the Game
+
+There isn't one.
+
+| Terminal  | Browser |
+| ------------- | ------------- |
+| <img width="735" height="977" alt="image" src="https://github.com/user-attachments/assets/28da2bc6-11af-4d99-a673-5ccbd6c0fd53" /> | <img width="1512" height="982" alt="image" src="https://github.com/user-attachments/assets/e9ac3652-ce96-4e9c-a5e5-bb3d32bb19b3" />  |
+
+
+
 
 ## Quick Start
 
