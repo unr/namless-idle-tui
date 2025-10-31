@@ -1,107 +1,113 @@
-# Nameless Idle TUI Game
+# Emotion Merchant (Name TBD)
 
-A terminal-based idle/incremental game built with Python and Textual framework. This is half day dream idea, half learning python + tui + claude code more in my spare time.
+A terminal-based idle game where you trade in the economy of feelings. Extract emotions from experiences, refine them into pure essence, and serve customers seeking specific emotional states.
 
-**✨ Now with Web Support!** Run the game in your terminal OR in a web browser using the latest Textual version.
+## A notice about vibe coding
 
-## Current State of the Game
-
-There isn't one.
-
-| Terminal  | Browser |
-| ------------- | ------------- |
-| <img width="735" height="977" alt="image" src="https://github.com/user-attachments/assets/28da2bc6-11af-4d99-a673-5ccbd6c0fd53" /> | <img width="1512" height="982" alt="image" src="https://github.com/user-attachments/assets/e9ac3652-ce96-4e9c-a5e5-bb3d32bb19b3" />  |
-
-
-
+This is mostly a vibe coded experimental project in my spare time, investigating how to solve ideas for side projects in new technology. The primary focus here is to mess around with python, the terminal, and game design in general. A _vast_ majority of the code written at this time is not written by me.
 
 ## Quick Start
 
-### Setup
+### Prerequisites
+
+Install [uv](https://docs.astral.sh/uv/) - a fast Python package manager:
 
 ```bash
-# Clone the repository
-git clone <repository-url>
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+### Terminal Version
+
+```bash
+# Clone and setup (installs all dependencies automatically)
+git clone <repository>
 cd idle-tui
+uv sync --all-extras
 
-# Create virtual environment
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# (Optional) Install development dependencies for web serving
-pip install -r requirements-dev.txt
+# Run in terminal
+uv run python -m src.idle_game.app
 ```
 
-### Terminal Version (TUI)
+### Web Version
 
-Run the game directly in your terminal:
+The app can also run in your browser using Textual's web server:
 
 ```bash
-python -m src.idle_game.app
+# Same setup as above
+uv sync --all-extras
+
+# Run web server
+uv run textual serve --port 8080 src.idle_game.app:IdleGame
+
+# Open http://localhost:8080 in your browser
 ```
 
-### Web Browser Version
+**Why uv?** 10-100x faster than pip, automatic virtual environment management, reproducible builds via lockfile.
 
-Serve the game in your web browser using Textual's built-in server:
+## Game Overview
 
-```bash
-# Requires textual-dev to be installed (included in requirements-dev.txt)
-textual serve --port 8080 "python -m src.idle_game.app"
+In Emotion Merchant, you:
 
-# Open browser to http://localhost:8080
-```
+- **Harvest** smiles through clicks and passive collection
+- **Refine** basic emotions into powerful essences
+- **Serve** customers with specific emotional needs
+- **Manage** purity, storage, and ethical choices
+- **Progress** through 10 tiers of emotional complexity
+
+## Core Resources
+
+| Tier | Resource | Cost | Production | Symbol |
+|------|----------|------|------------|--------|
+| 0 | Smiles | Click: 5 | 1/sec | ☺ |
+| 1 | Joy | 10 Smiles | 0.5 Smiles/sec | ❤ |
+| 2 | Love | 100 Joy | 2 Joy/sec | 💕 |
+| 3 | Nostalgia | 500 Love | 5 Love/sec | ❖ |
+| 4 | Serenity | 2.5K Nostalgia | 10 Nostalgia/sec | ◉ |
+| 5 | Euphoria | 12.5K Serenity | 50 Serenity/sec | ✧ |
+| 6 | Compassion | 62.5K Euphoria | 100 Euphoria/sec | ❀ |
+| 7 | Wisdom | 312.5K Compassion | 500 Compassion/sec | ◈ |
+| 8 | Transcendence | 1.5M Wisdom | 1K Wisdom/sec | ✵ |
+| 9 | Singularity | 10M Transcendence | 10K Transcendence/sec | ∞ |
 
 ## Game Controls
 
-- **Click Button** - Adds +10 resources
-- **s** - Save game (also auto-saves every 10 seconds)
-- **r** - Reset game progress (with confirmation)
+### Terminal Version
+
+- **Click/Space** - Harvest smiles
+- **s** - Save game (auto-saves every 10s)
+- **r** - Reset progress
 - **q** - Quit
+- **Tab** - Navigate UI elements
 
-## Reset Progress
+### Web Version
 
-Three ways to reset your game:
-
-1. **In-game**: Press 'r' while playing
-2. **Script**: Run `python3 reset_game.py`
-3. **Manual**: Delete `data/game.db`
-
-## Features
-
-- 🔄 Auto-increment resources (1/second)
-- 💾 Persistent saves with SQLite
-- 🌙 Offline progression calculation
-- 🎨 Styled terminal UI
-- 🔢 Large number support with suffixes (K, M, B, T, etc.)
-
-## Project Goals
-
-- fast, performant incremental game
-- ascii / tui interface
-- truly a tui -- can run as a local package in your terminal
-- truly a webapp -- can run as a web app as an authenticated user
-- cross progression (same account both web+tui)
-
-## Dependencies
-
-### Production
-- **Textual** 6.4.0+ - Modern TUI framework
-- **aiosqlite** - Async SQLite database
-- **pydantic** - Data validation  
-- **python-dateutil** - Date/time utilities
-
-### Development  
-- **textual-dev** - Includes `textual serve` command for web version
-- **pytest** - Testing framework
-- **black**, **ruff**, **mypy** - Code quality tools
+- **Click button** - Harvest smiles
+- All keyboard shortcuts work the same as terminal version
+- Runs in any modern browser without installation
 
 ## Documentation
 
-See [COMPLETE.md](COMPLETE.md) for full documentation on:
-- Architecture details
-- How to add new features
-- Troubleshooting
-- Development tips
+- [Development Guide](DEVELOPMENT.md) - Setup and workflows
+- [Game Design Docs](docs/game-design/) - Detailed mechanics
+- [Technical Docs](docs/technical/) - Architecture and implementation
+- [Legacy Ideas](docs-legacy/) - Previous design explorations
+
+## Current Features
+
+✅ Basic clicking and idle progression  
+✅ Persistent saves with offline progress  
+✅ Large number formatting  
+✅ Terminal and web support  
+⏳ Emotion storage system  
+⏳ Customer interactions  
+⏳ Alchemy and recipes  
+⏳ Shop and upgrades  
+
+## Project Status
+
+**Phase: Early Development**  
+Currently implementing core emotion harvesting and storage systems. The basic idle game loop is functional with saves and offline progression.
+
+## License
+
+MIT

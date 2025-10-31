@@ -36,12 +36,16 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
 
 # Environments
 .env
 .venv
 env/
 venv/
+venv-tui/
 ENV/
 env.bak/
 venv.bak/

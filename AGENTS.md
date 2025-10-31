@@ -2,13 +2,33 @@
 
 ## Build/Test Commands
 
-- Setup: `python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt`
-- Install dev tools: `pip install -r requirements-dev.txt`
-- Run TUI app: `python -m src.idle_game.app`
-- Run web version: `textual serve --port 8080 "python -m src.idle_game.app"`
-- Run tests: `pytest tests/` or single test: `pytest tests/test_database.py::test_save_and_load -v`
-- Format code: `black src/ tests/` and `ruff check --fix src/`
-- Type checking: `mypy src/`
+This project uses **uv** for fast, reproducible dependency management.
+
+- Setup: `uv sync --all-extras`
+- Run TUI app: `uv run python -m src.idle_game.app`
+- Run web version: `uv run textual serve --port 8080 src.idle_game.app:IdleGame`
+- Run web with hot reload: `uv run textual serve --port 8080 --reload src.idle_game.app:IdleGame`
+- Run with devtools: `uv run textual run --dev src.idle_game.app:IdleGame`
+- Run tests: `uv run pytest tests/` or single test: `uv run pytest tests/test_database.py::test_save_and_load -v`
+- Run tests with coverage: `uv run pytest tests/ --cov=src --cov-report=term-missing`
+- Format code: `uv run black src/ tests/` and `uv run ruff check --fix src/`
+- Type checking: `uv run mypy src/`
+- Add dependency: `uv add <package>` or dev: `uv add --dev <package>`
+- Update dependencies: `uv sync --upgrade`
+- Reset game: `uv run python reset_game.py`
+
+## Testing Both Experiences
+
+This game must work in **both terminal and web** modes. Always test changes in both:
+
+1. **Terminal**: `uv run python -m src.idle_game.app`
+2. **Web**: `uv run textual serve --port 8080 src.idle_game.app:IdleGame`
+
+Web version is crucial for:
+- Cross-device testing
+- Demoing to users without terminal access
+- Mobile/tablet compatibility testing
+- Easier sharing and collaboration
 
 ## Code Style Guidelines
 

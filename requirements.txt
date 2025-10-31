@@ -1,8 +1,0 @@
-# Core dependencies
-textual>=0.89.0
-aiosqlite>=0.20.0
-python-dateutil>=2.9.0
-pydantic>=2.10.0
-
-# Optional: For syntax highlighting in TextArea (if needed)
-# textual[syntax]
