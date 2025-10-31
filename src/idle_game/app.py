@@ -4,34 +4,34 @@ from textual.widgets import Header, Footer, Static, Label, Button
 from textual.reactive import reactive
 from textual.timer import Timer
 from textual.screen import ModalScreen
-import asyncio
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 
-from .models import GameState, GameNumber
+from .models import GameState
 from .database import GameDatabase
 from .widgets.counter import CounterDisplay
 from .widgets.clicker import ClickButton
 
+
 class IdleGame(App):
     """Main idle game application"""
-    
+
     CSS_PATH = "styles/main.tcss"
     BINDINGS = [
         ("q", "quit", "Quit"),
         ("s", "save", "Save Game"),
         ("r", "reset", "Reset Game"),
     ]
-    
+
     game_state: reactive[GameState] = reactive(GameState())
-    
+
     def __init__(self):
         super().__init__()
         self.db = GameDatabase()
         self.update_timer: Optional[Timer] = None
         self.save_timer: Optional[Timer] = None
-    
+
     def compose(self) -> ComposeResult:
         yield Header()
         with Container(id="main-container"):
@@ -40,11 +40,11 @@ class IdleGame(App):
                 yield ClickButton()
                 yield Label("[dim]Auto: +1/sec[/dim]", id="rate-display")
         yield Footer()
-    
+
     async def on_mount(self):
         """Initialize game on mount"""
         await self.db.initialize()
-        
+
         # Load saved state
         saved_state = await self.db.load_state()
         if saved_state:
@@ -56,82 +56,84 @@ class IdleGame(App):
                 saved_state.counter = saved_state.counter.add(offline_earnings.value)
                 self.notify(
                     f"Welcome back! You earned {offline_earnings.format()} while away!",
-                    severity="information"
+                    severity="information",
                 )
             saved_state.last_update = now
             self.game_state = saved_state
-        
+
         # Start timers
         self.update_timer = self.set_interval(0.1, self.game_tick)
         self.save_timer = self.set_interval(10.0, self.auto_save)
-    
+
     def game_tick(self):
         """Main game loop tick"""
         now = datetime.now()
         increment = self.game_state.update(now)
-        
+
         # Update display
         counter_widget = self.query_one("#counter", CounterDisplay)
         counter_widget.value = self.game_state.counter
-        
+
         # Show increment if significant
         if increment.value >= Decimal("0.1"):
             counter_widget.show_increment(increment)
-    
+
     async def auto_save(self):
         """Auto-save every 10 seconds"""
         await self.db.save_state(self.game_state)
-    
+
     async def on_click_button_clicked(self, event: ClickButton.Clicked):
         """Handle manual clicks"""
         increment = self.game_state.click()
-        
+
         # Update and show increment
         counter_widget = self.query_one("#counter", CounterDisplay)
         counter_widget.value = self.game_state.counter
         counter_widget.show_increment(increment)
-    
+
     async def action_save(self):
         """Manual save action"""
         await self.db.save_state(self.game_state)
         self.notify("Game saved!", severity="information")
-    
+
     async def action_reset(self):
         """Reset game with confirmation"""
-        
+
         class ConfirmReset(ModalScreen):
             """Modal dialog for reset confirmation"""
-            
+
             def compose(self):
                 yield Container(
                     Static("⚠️ Reset Game?", id="reset-title"),
-                    Static("This will delete all progress and cannot be undone!", id="reset-warning"),
+                    Static(
+                        "This will delete all progress and cannot be undone!", id="reset-warning"
+                    ),
                     Horizontal(
                         Button("Cancel", variant="default", id="cancel"),
                         Button("Reset", variant="error", id="confirm"),
-                        id="reset-buttons"
+                        id="reset-buttons",
                     ),
-                    id="reset-dialog"
+                    id="reset-dialog",
                 )
-            
+
             def on_button_pressed(self, event):
                 if event.button.id == "confirm":
                     self.dismiss(True)
                 else:
                     self.dismiss(False)
-        
+
         # Show confirmation dialog
         if await self.push_screen_wait(ConfirmReset()):
             # Reset the game state
             self.game_state = GameState()
             await self.db.save_state(self.game_state)
-            
+
             # Update UI
             counter_widget = self.query_one("#counter", CounterDisplay)
             counter_widget.value = self.game_state.counter
-            
+
             self.notify("Game reset! Starting fresh.", severity="warning")
-    
+
     async def on_unmount(self):
         """Clean up on exit"""
         if self.update_timer:
@@ -140,10 +142,12 @@ class IdleGame(App):
             self.save_timer.stop()
         await self.db.save_state(self.game_state)
 
+
 def main():
     """Entry point"""
     app = IdleGame()
     app.run()
+
 
 if __name__ == "__main__":
     main()
