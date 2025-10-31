@@ -11,7 +11,7 @@ class ClickButton(Button):
         pass
 
     def __init__(self):
-        super().__init__("🖱️ CLICK FOR +10", id="click-button")
+        super().__init__("CLICK FOR +10", id="click-button")
 
     def on_button_pressed(self):
         self.post_message(self.Clicked())

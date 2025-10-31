@@ -22,9 +22,11 @@ class IdleGame(App):
         ("q", "quit", "Quit"),
         ("s", "save", "Save Game"),
         ("r", "reset", "Reset Game"),
+        ("p", "toggle_updates", "Pause/Resume"),
     ]
 
     game_state: reactive[GameState] = reactive(GameState())
+    updates_enabled: reactive[bool] = reactive(False)
 
     def __init__(self):
         super().__init__()
@@ -39,6 +41,7 @@ class IdleGame(App):
                 yield CounterDisplay(id="counter")
                 yield ClickButton()
                 yield Label("[dim]Auto: +1/sec[/dim]", id="rate-display")
+                yield Button("▶️ Enable Updates", id="toggle-updates", variant="success")
         yield Footer()
 
     async def on_mount(self):
@@ -67,6 +70,9 @@ class IdleGame(App):
 
     def game_tick(self):
         """Main game loop tick"""
+        if not self.updates_enabled:
+            return
+
         now = datetime.now()
         increment = self.game_state.update(now)
 
@@ -91,10 +97,28 @@ class IdleGame(App):
         counter_widget.value = self.game_state.counter
         counter_widget.show_increment(increment)
 
+    def on_button_pressed(self, event: Button.Pressed):
+        """Handle button presses"""
+        if event.button.id == "toggle-updates":
+            self.action_toggle_updates()
+
     async def action_save(self):
         """Manual save action"""
         await self.db.save_state(self.game_state)
         self.notify("Game saved!", severity="information")
+
+    def action_toggle_updates(self):
+        """Toggle game updates on/off"""
+        self.updates_enabled = not self.updates_enabled
+        button = self.query_one("#toggle-updates", Button)
+        if self.updates_enabled:
+            button.label = "⏸️ Disable Updates"
+            button.variant = "error"
+            self.notify("Game updates enabled", severity="information")
+        else:
+            button.label = "▶️ Enable Updates"
+            button.variant = "success"
+            self.notify("Game updates disabled", severity="warning")
 
     async def action_reset(self):
         """Reset game with confirmation"""
