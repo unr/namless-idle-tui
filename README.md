@@ -2,6 +2,10 @@
 
 A terminal-based idle game where you trade in the economy of feelings. Extract emotions from experiences, refine them into pure essence, and serve customers seeking specific emotional states.
 
+## A notice about vibe coding
+
+This is mostly a vibe coded experimental project in my spare time, investigating how to solve ideas for side projects in new technology. The primary focus here is to mess around with python, the terminal, and game design in general. A _vast_ majority of the code written at this time is not written by me.
+
 ## Quick Start
 
 ### Prerequisites
