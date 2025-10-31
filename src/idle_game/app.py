@@ -7,6 +7,7 @@ from textual.screen import ModalScreen
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional
+import asyncio
 
 from .models import GameState
 from .database import GameDatabase
@@ -19,7 +20,7 @@ class IdleGame(App):
 
     CSS_PATH = "styles/main.tcss"
     BINDINGS = [
-        ("q", "quit", "Quit"),
+        ("q", "request_quit", "Quit"),
         ("s", "save", "Save Game"),
         ("r", "reset", "Reset Game"),
         ("p", "toggle_updates", "Pause/Resume"),
@@ -33,6 +34,8 @@ class IdleGame(App):
         self.db = GameDatabase()
         self.update_timer: Optional[Timer] = None
         self.save_timer: Optional[Timer] = None
+        self._save_in_progress = False
+        self._quit_requested = False
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -86,7 +89,9 @@ class IdleGame(App):
 
     async def auto_save(self):
         """Auto-save every 10 seconds"""
+        self._save_in_progress = True
         await self.db.save_state(self.game_state)
+        self._save_in_progress = False
 
     async def on_click_button_clicked(self, event: ClickButton.Clicked):
         """Handle manual clicks"""
@@ -104,7 +109,9 @@ class IdleGame(App):
 
     async def action_save(self):
         """Manual save action"""
+        self._save_in_progress = True
         await self.db.save_state(self.game_state)
+        self._save_in_progress = False
         self.notify("Game saved!", severity="information")
 
     def action_toggle_updates(self):
@@ -112,15 +119,15 @@ class IdleGame(App):
         self.updates_enabled = not self.updates_enabled
         button = self.query_one("#toggle-updates", Button)
         if self.updates_enabled:
-            button.label = "⏸️ Disable Updates"
+            button.label = "Disable Updates"
             button.variant = "error"
             self.notify("Game updates enabled", severity="information")
         else:
-            button.label = "▶️ Enable Updates"
+            button.label = "Enable Updates"
             button.variant = "success"
             self.notify("Game updates disabled", severity="warning")
 
-    async def action_reset(self):
+    def action_reset(self):
         """Reset game with confirmation"""
 
         class ConfirmReset(ModalScreen):
@@ -128,7 +135,7 @@ class IdleGame(App):
 
             def compose(self):
                 yield Container(
-                    Static("⚠️ Reset Game?", id="reset-title"),
+                    Static("Reset Game?", id="reset-title"),
                     Static(
                         "This will delete all progress and cannot be undone!", id="reset-warning"
                     ),
@@ -146,17 +153,42 @@ class IdleGame(App):
                 else:
                     self.dismiss(False)
 
-        # Show confirmation dialog
-        if await self.push_screen_wait(ConfirmReset()):
-            # Reset the game state
-            self.game_state = GameState()
-            await self.db.save_state(self.game_state)
+        async def handle_reset():
+            if await self.push_screen_wait(ConfirmReset()):
+                self.updates_enabled = False
 
-            # Update UI
-            counter_widget = self.query_one("#counter", CounterDisplay)
-            counter_widget.value = self.game_state.counter
+                if self.save_timer:
+                    self.save_timer.stop()
+                if self.update_timer:
+                    self.update_timer.stop()
 
-            self.notify("Game reset! Starting fresh.", severity="warning")
+                self.game_state = GameState()
+                self._save_in_progress = True
+                await self.db.save_state(self.game_state)
+                self._save_in_progress = False
+
+                counter_widget = self.query_one("#counter", CounterDisplay)
+                counter_widget.value = self.game_state.counter
+
+                self.save_timer = self.set_interval(10.0, self.auto_save)
+                self.update_timer = self.set_interval(0.1, self.game_tick)
+
+                self.notify("Game reset! Starting fresh.", severity="warning")
+
+        self.run_worker(handle_reset())
+
+    def action_request_quit(self):
+        """Handle quit request, wait for save if needed"""
+
+        async def handle_quit():
+            if self._save_in_progress:
+                self.notify("Saving...", timeout=1)
+                while self._save_in_progress:
+                    await asyncio.sleep(0.01)
+            self.exit()
+
+        self._quit_requested = True
+        self.run_worker(handle_quit())
 
     async def on_unmount(self):
         """Clean up on exit"""
@@ -164,7 +196,10 @@ class IdleGame(App):
             self.update_timer.stop()
         if self.save_timer:
             self.save_timer.stop()
+
+        self._save_in_progress = True
         await self.db.save_state(self.game_state)
+        self._save_in_progress = False
 
 
 def main():
