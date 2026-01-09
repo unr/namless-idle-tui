@@ -1,4 +1,4 @@
-# Emotion Merchant (Name TBD)
+# Emotion Merchant
 
 A terminal-based idle game where you trade in the economy of feelings. Extract emotions from experiences, refine them into pure essence, and serve customers seeking specific emotional states.
 
@@ -21,11 +21,11 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 ```bash
 # Clone and setup (installs all dependencies automatically)
 git clone <repository>
-cd idle-tui
+cd namless-idle-tui
 uv sync --all-extras
 
 # Run in terminal
-uv run python -m src.idle_game.app
+uv run python -m src.emotion_merchant.app
 ```
 
 ### Web Version
@@ -37,7 +37,7 @@ The app can also run in your browser using Textual's web server:
 uv sync --all-extras
 
 # Run web server
-uv run textual serve --port 8080 src.idle_game.app:IdleGame
+uv run textual serve --port 8080 src.emotion_merchant.app:EmotionMerchantApp
 
 # Open http://localhost:8080 in your browser
 ```
@@ -71,42 +71,73 @@ In Emotion Merchant, you:
 
 ## Game Controls
 
-### Terminal Version
+### Keyboard Shortcuts
 
-- **Click/Space** - Harvest smiles
-- **s** - Save game (auto-saves every 10s)
-- **r** - Reset progress
-- **q** - Quit
-- **Tab** - Navigate UI elements
+| Key | Action |
+|-----|--------|
+| `Space` | Harvest smiles |
+| `t` | Trade with tutorial customer |
+| `s` | Save game |
+| `p` | Pause/Resume |
+| `q` | Quit |
 
-### Web Version
+### Mouse
 
-- **Click button** - Harvest smiles
-- All keyboard shortcuts work the same as terminal version
-- Runs in any modern browser without installation
+- Click the "CLICK!" button to harvest smiles
+- Navigate UI elements with mouse
 
 ## Documentation
 
-- [Development Guide](DEVELOPMENT.md) - Setup and workflows
 - [Game Design Docs](docs/game-design/) - Detailed mechanics
 - [Technical Docs](docs/technical/) - Architecture and implementation
-- [Legacy Ideas](docs-legacy/) - Previous design explorations
 
 ## Current Features
 
-✅ Basic clicking and idle progression  
-✅ Persistent saves with offline progress  
-✅ Large number formatting  
-✅ Terminal and web support  
-⏳ Emotion storage system  
-⏳ Customer interactions  
-⏳ Alchemy and recipes  
-⏳ Shop and upgrades  
+- Click harvesting for Smiles
+- Passive resource generation
+- 10-tier emotion resource hierarchy
+- Storage capacity management
+- Purity system (emotions degrade over time)
+- Tutorial customers (event-triggered progression)
+- Customer queue system
+- Production buildings with exponential cost scaling
+- Save/load game state
+- Pause/resume functionality
+- Three-panel TUI layout (Resources | Game Area | Customers)
 
-## Project Status
+## Architecture
 
-**Phase: Early Development**  
-Currently implementing core emotion harvesting and storage systems. The basic idle game loop is functional with saves and offline progression.
+```
+src/emotion_merchant/
+├── app.py                 # Main Textual App
+├── game/
+│   ├── state.py           # Game state management with observer pattern
+│   ├── resources.py       # Emotion tier definitions
+│   ├── production.py      # Production engine & storage upgrades
+│   └── customers.py       # Customer & tutorial system
+├── widgets/
+│   ├── resource_panel.py  # Resource display with progress bars
+│   ├── clicker.py         # Click harvesting widget
+│   └── customer_panel.py  # Customer queue display
+└── styles/
+    └── main.tcss          # Textual CSS styling
+```
+
+## Development
+
+```bash
+# Install dev dependencies
+uv sync --all-extras
+
+# Run tests
+uv run pytest tests/ -v
+
+# Run linting
+uv run ruff check src/
+
+# Run the game
+uv run python -m src.emotion_merchant.app
+```
 
 ## License
 

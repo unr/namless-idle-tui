@@ -3,9 +3,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "idle-tui"
+name = "emotion-merchant"
 version = "0.1.0"
-description = "An idle game built with Textual TUI framework"
+description = "Emotion Merchant - An idle game TUI where you harvest, refine, and trade emotions"
 readme = "README.md"
 requires-python = ">=3.11"
 classifiers = [
@@ -36,7 +36,7 @@ dev = [
 ]
 
 [project.scripts]
-idle-game = "src.idle_game.app:main"
+emotion-merchant = "src.emotion_merchant.app:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src"]
