@@ -1,0 +1,55 @@
+/* Emotion Merchant - Minimal TUI Styling */
+
+Screen {
+    background: $surface;
+}
+
+#title-banner {
+    height: 5;
+    background: $primary;
+    border: heavy $accent;
+    margin: 1;
+}
+
+#game-title {
+    text-align: center;
+    text-style: bold;
+}
+
+#game-subtitle {
+    text-align: center;
+    color: $text-muted;
+}
+
+#game-container {
+    height: 100%;
+}
+
+#main-area {
+    height: 1fr;
+}
+
+#left-panel, #center-panel, #right-panel {
+    width: 1fr;
+    border: solid $primary;
+    padding: 1;
+    margin: 0 1;
+}
+
+.panel-header {
+    text-style: bold;
+    background: $primary;
+    padding: 1;
+}
+
+Button {
+    margin: 1;
+}
+
+.resource-line {
+    padding: 0 1;
+}
+
+.stat-line {
+    padding: 0 1;
+}
