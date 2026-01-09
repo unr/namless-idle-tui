@@ -12,6 +12,8 @@ from src.idle_game.models.game_state import GameState
 from src.idle_game.screens.game_screen import GameScreen
 from src.idle_game.screens.alchemy_screen import AlchemyScreen
 from src.idle_game.screens.customer_screen import CustomerScreen
+from src.idle_game.screens.shop_screen import ShopScreen
+from src.idle_game.screens.prestige_screen import PrestigeScreen
 
 
 class IdleGameApp(App[None]):
@@ -30,6 +32,7 @@ class IdleGameApp(App[None]):
         Binding("a", "show_alchemy", "Alchemy"),
         Binding("c", "show_customers", "Customers"),
         Binding("m", "show_market", "Market"),
+        Binding("r", "show_prestige", "Prestige"),
         Binding("?", "help", "Help"),
     ]
 
@@ -213,8 +216,17 @@ class IdleGameApp(App[None]):
 
     def action_show_market(self) -> None:
         """Show the market/shop screen."""
-        # TODO: Implement shop screen
-        self.notify("Market system coming soon!", severity="warning")
+        try:
+            self.push_screen(ShopScreen(self.game_state))
+        except Exception as e:
+            self.notify(f"Error loading shop screen: {e}", severity="error")
+
+    def action_show_prestige(self) -> None:
+        """Show the prestige/rebirth screen."""
+        try:
+            self.push_screen(PrestigeScreen(self.game_state))
+        except Exception as e:
+            self.notify(f"Error loading prestige screen: {e}", severity="error")
 
     def action_help(self) -> None:
         """Show help information."""

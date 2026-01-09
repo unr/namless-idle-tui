@@ -13,6 +13,7 @@ from textual.reactive import Reactive
 
 from src.idle_game.data.emotions import EMOTION_TIERS, get_emotion
 from src.idle_game.models.resources import EmotionResource, ResourceCalculator
+from src.idle_game.models.upgrades import UpgradeManager
 
 if TYPE_CHECKING:
     from src.idle_game.models.customer import TutorialCustomer
@@ -84,6 +85,9 @@ class GameState:
     completed_tutorials: List[str]  # IDs of completed tutorial customers
     pending_tutorial_customer: Optional['TutorialCustomer']  # Tutorial customer waiting to appear
 
+    # Upgrade system
+    upgrade_manager: UpgradeManager
+
     def __init__(self):
         """Initialize the game state with default values."""
         # Initialize with Smiles unlocked by default
@@ -107,6 +111,7 @@ class GameState:
         self.tutorial_stage = 0
         self.completed_tutorials = []
         self.pending_tutorial_customer = None
+        self.upgrade_manager = UpgradeManager()
 
     def unlock_emotion(self, emotion_type: str) -> bool:
         """Unlock a new emotion type.
@@ -302,6 +307,66 @@ class GameState:
         new_score = self.ethical_score + change
         # Clamp between 0 and 100
         self.ethical_score = max(Decimal("0"), min(Decimal("100"), new_score))
+
+    def purchase_upgrade(self, upgrade_id: str) -> bool:
+        """Purchase an upgrade from the shop.
+
+        Args:
+            upgrade_id: ID of the upgrade to purchase
+
+        Returns:
+            True if purchase successful
+        """
+        from src.idle_game.models.upgrades import UPGRADE_DEFINITIONS
+
+        if upgrade_id not in UPGRADE_DEFINITIONS:
+            return False
+
+        upgrade_def = UPGRADE_DEFINITIONS[upgrade_id]
+
+        # Get current resource amounts
+        resource_amounts = {
+            emotion_type: resource.amount
+            for emotion_type, resource in self.resources.items()
+        }
+
+        # Check if can afford
+        if not self.upgrade_manager.can_afford_upgrade(upgrade_id, resource_amounts):
+            return False
+
+        # Calculate cost
+        cost = self.upgrade_manager.calculate_upgrade_cost(upgrade_id)
+        currency = upgrade_def.cost_currency
+
+        # Deduct cost
+        currency_resource = self.get_resource(currency)
+        currency_resource.remove_amount(cost)
+
+        # Purchase upgrade
+        success = self.upgrade_manager.purchase_upgrade(upgrade_id)
+
+        if success:
+            # Apply upgrade effects immediately
+            self._apply_upgrade_effects()
+
+            # Trigger reactivity
+            self.resources = dict(self.resources)
+
+        return success
+
+    def _apply_upgrade_effects(self) -> None:
+        """Apply all upgrade effects to game state."""
+        # Click power upgrade
+        click_multiplier = self.upgrade_manager.get_total_multiplier("click_power")
+        self.click_multiplier = Decimal(str(click_multiplier))
+
+        # Production boost upgrade
+        production_multiplier = self.upgrade_manager.get_total_multiplier("production_boost")
+        self.global_production_multiplier = Decimal(str(production_multiplier))
+
+        # Offline efficiency upgrade
+        offline_multiplier = self.upgrade_manager.get_total_multiplier("offline_efficiency")
+        self.offline_efficiency = Decimal(str(offline_multiplier))
 
     def execute_tutorial_trade(self, tutorial_customer: 'TutorialCustomer') -> bool:
         """Execute a tutorial customer trade.
