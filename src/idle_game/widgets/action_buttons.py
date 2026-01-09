@@ -11,6 +11,32 @@ from textual.containers import Container, Vertical, Horizontal, Grid
 from textual.message import Message
 
 
+class HarvestClicked(Message):
+    """Message sent when harvest button is clicked."""
+
+    def __init__(self, amount: Decimal) -> None:
+        """Initialize the message.
+
+        Args:
+            amount: Amount to harvest
+        """
+        super().__init__()
+        self.amount = amount
+
+
+class ProducerPurchased(Message):
+    """Message sent when a producer is purchased."""
+
+    def __init__(self, emotion_type: str) -> None:
+        """Initialize the message.
+
+        Args:
+            emotion_type: Type of emotion (e.g., "smiles", "joy")
+        """
+        super().__init__()
+        self.emotion_type = emotion_type
+
+
 class ProducerButton(Static):
     """Button for purchasing emotion producers/buildings."""
 
@@ -138,6 +164,14 @@ class ProducerButton(Static):
         else:
             return f"{cost_float:.0f}"
 
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        """Handle buy button press."""
+        if ".buy-button" in event.button.classes:
+            # Extract emotion type from producer name (e.g., "Joy Factory" -> "joy")
+            emotion_type = self.producer_name.replace(" Factory", "").lower()
+            # Post message to parent
+            self.post_message(ProducerPurchased(emotion_type))
+
     def _format_production(self) -> str:
         """Format the production rate display."""
         if self.is_locked:
@@ -151,19 +185,6 @@ class ProducerButton(Static):
         if not self.is_locked and self.can_afford:
             # Post a custom message that the parent can handle
             self.post_message(self.ProducerPurchased(self.name))
-
-    class ProducerPurchased(Message):
-        """Message sent when a producer is purchased."""
-
-        def __init__(self, producer_name: str) -> None:
-            """Initialize the message.
-
-            Args:
-                producer_name: Name of the purchased producer
-            """
-            super().__init__()
-            self.producer_name = producer_name
-
 
 class ActionButtons(Widget):
     """Widget containing click button and producer purchase buttons."""
@@ -281,7 +302,7 @@ class ActionButtons(Widget):
             self.total_clicks += 1
 
             # Post a custom message for the game logic to handle
-            self.post_message(self.HarvestClicked(self.click_power * Decimal(self.click_multiplier)))
+            self.post_message(HarvestClicked(self.click_power * Decimal(self.click_multiplier)))
 
     def update_producer(
         self,
@@ -352,14 +373,63 @@ class ActionButtons(Widget):
         producers_list = self.query_one("#producers-list", Vertical)
         producers_list.mount(producer, before=producers_list.children[-1])
 
-    class HarvestClicked(Message):
-        """Message sent when harvest button is clicked."""
+    def update_from_game_state(self) -> None:
+        """Update action buttons from game state."""
+        if not self.game_state:
+            return
 
-        def __init__(self, amount: Decimal) -> None:
-            """Initialize the message.
+        # Update click power and multiplier
+        from src.idle_game.data.emotions import get_emotion
+        from src.idle_game.models.resources import ResourceCalculator
+        smiles_emotion = get_emotion("smiles")
+        self.click_power = Decimal(ResourceCalculator.calculate_click_power(
+            smiles_emotion.base_cost,
+            self.game_state.click_multiplier,
+            self.game_state.mood_rating
+        ))
+        self.click_multiplier = float(self.game_state.click_multiplier)
+        self.total_clicks = self.game_state.total_clicks
 
-            Args:
-                amount: Amount to harvest
-            """
-            super().__init__()
-            self.amount = amount
+        # Update producer buttons
+        for emotion_name, emotion_resource in self.game_state.resources.items():
+            if emotion_name.lower() == "smiles":
+                continue  # No producer for Smiles (it's the base currency)
+
+            # Capitalize for display
+            emotion_name_display = emotion_name.title()
+
+            producer_name = f"{emotion_name_display} Factory"
+            if producer_name not in self.producer_buttons:
+                # Create producer button if it doesn't exist and emotion is unlocked
+                if emotion_name in self.game_state.unlocked_emotions:
+                    # Get emotion definition
+                    from src.idle_game.data.emotions import get_emotion
+                    emotion_def = get_emotion(emotion_name)
+                    if emotion_def:
+                        self.add_producer(
+                            name=producer_name,
+                            description=f"Converts {emotion_def.produces.title()} into {emotion_name_display}",
+                            resource_type=emotion_def.produces,
+                            cost=emotion_def.base_cost,
+                            production_rate=Decimal(emotion_def.production_rate)
+                        )
+            else:
+                # Update existing producer
+                from src.idle_game.data.emotions import get_emotion
+                producer_count = self.game_state.buildings.get(emotion_name.lower(), 0)
+                emotion_def = get_emotion(emotion_name)
+                if not emotion_def:
+                    continue
+                cost = ResourceCalculator.calculate_producer_cost(
+                    emotion_def.base_cost,
+                    producer_count
+                )
+                can_afford = self.game_state.can_afford_producer(emotion_name)
+
+                self.update_producer(
+                    name=producer_name,
+                    cost=cost,
+                    owned_count=producer_count,
+                    can_afford=can_afford,
+                    is_locked=(emotion_name not in self.game_state.unlocked_emotions)
+                )

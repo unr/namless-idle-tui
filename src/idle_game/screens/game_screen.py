@@ -6,7 +6,7 @@ from textual.containers import Container, Horizontal, Vertical, ScrollableContai
 from textual.widgets import Header, Footer, Static, Label
 
 from src.idle_game.widgets.resource_panel import ResourcePanel
-from src.idle_game.widgets.action_buttons import ActionButtons
+from src.idle_game.widgets.action_buttons import ActionButtons, HarvestClicked, ProducerPurchased
 from src.idle_game.widgets.stat_display import StatDisplay
 
 
@@ -84,6 +84,53 @@ class GameScreen(Screen):
         """
         event_display = self.query_one("#event-display", Static)
         event_display.update(message)
+
+    def on_harvest_clicked(self, message: HarvestClicked) -> None:
+        """Handle harvest button clicks.
+
+        Args:
+            message: The HarvestClicked message
+        """
+        # Perform click in game state
+        smiles_earned = self.game_state.perform_click()
+
+        # Update resource panel
+        self.refresh_resources()
+
+        # Show feedback
+        self.update_event_display(f"☺ Harvested {smiles_earned} Smiles!")
+
+    def on_producer_purchased(self, message: ProducerPurchased) -> None:
+        """Handle producer purchase attempts.
+
+        Args:
+            message: The ProducerPurchased message containing producer info
+        """
+        success = self.game_state.purchase_producer(message.emotion_type)
+
+        if success:
+            # Update displays
+            self.refresh_resources()
+            self.refresh_action_buttons()
+
+            # Show feedback
+            emotion_name = message.emotion_type.title()
+            self.update_event_display(f"✓ Purchased {emotion_name} producer!")
+        else:
+            # Show error
+            self.update_event_display(f"✗ Not enough resources!")
+
+    def refresh_resources(self) -> None:
+        """Refresh the resource panel display."""
+        resource_panel = self.query_one(ResourcePanel)
+        if resource_panel:
+            resource_panel.update_from_game_state()
+
+    def refresh_action_buttons(self) -> None:
+        """Refresh the action buttons display."""
+        action_buttons = self.query_one(ActionButtons)
+        if action_buttons:
+            action_buttons.update_from_game_state()
 
     def on_key(self, event) -> None:
         """Handle screen-specific key events."""

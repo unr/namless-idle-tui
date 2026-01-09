@@ -7,12 +7,15 @@ Textual's reactive attributes for automatic UI updates.
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Optional, TYPE_CHECKING
 
 from textual.reactive import Reactive
 
 from src.idle_game.data.emotions import EMOTION_TIERS, get_emotion
 from src.idle_game.models.resources import EmotionResource, ResourceCalculator
+
+if TYPE_CHECKING:
+    from src.idle_game.models.customer import TutorialCustomer
 
 
 class GameState:
@@ -49,6 +52,9 @@ class GameState:
     # Unlocked emotions - set
     unlocked_emotions: Set[str]
 
+    # Buildings/producers - dictionary of emotion_type -> count
+    buildings: Dict[str, int]
+
     # Multipliers - decimals
     click_multiplier: Decimal
     global_production_multiplier: Decimal
@@ -75,12 +81,15 @@ class GameState:
     # Tutorial progress
     tutorial_completed: bool
     tutorial_stage: int
+    completed_tutorials: List[str]  # IDs of completed tutorial customers
+    pending_tutorial_customer: Optional['TutorialCustomer']  # Tutorial customer waiting to appear
 
     def __init__(self):
         """Initialize the game state with default values."""
         # Initialize with Smiles unlocked by default
         self.resources = {"smiles": EmotionResource("smiles", amount=Decimal("0"))}
         self.unlocked_emotions = {"smiles"}
+        self.buildings = {}  # emotion_type -> count
         self.click_multiplier = Decimal("1.0")
         self.global_production_multiplier = Decimal("1.0")
         self.offline_efficiency = Decimal("1.0")
@@ -96,6 +105,8 @@ class GameState:
         self.game_paused = False
         self.tutorial_completed = False
         self.tutorial_stage = 0
+        self.completed_tutorials = []
+        self.pending_tutorial_customer = None
 
     def unlock_emotion(self, emotion_type: str) -> bool:
         """Unlock a new emotion type.
@@ -208,6 +219,9 @@ class GameState:
         payment_resource.remove_amount(cost)
         resource.producer_count += 1
 
+        # Update buildings dictionary
+        self.buildings[emotion_type] = resource.producer_count
+
         # Trigger resource update for reactivity
         self.resources = dict(self.resources)
 
@@ -288,6 +302,51 @@ class GameState:
         new_score = self.ethical_score + change
         # Clamp between 0 and 100
         self.ethical_score = max(Decimal("0"), min(Decimal("100"), new_score))
+
+    def execute_tutorial_trade(self, tutorial_customer: 'TutorialCustomer') -> bool:
+        """Execute a tutorial customer trade.
+
+        Args:
+            tutorial_customer: The tutorial customer with trade details
+
+        Returns:
+            True if trade executed successfully, False if player can't afford it
+        """
+        if not tutorial_customer.template:
+            return False
+
+        template = tutorial_customer.template
+        trade = template.trade
+
+        # Check if player has enough of the giving resource
+        giving_resource = self.get_resource(trade.gives_emotion)
+        if not giving_resource.can_afford(Decimal(str(trade.gives_amount))):
+            return False
+
+        # Remove the cost
+        giving_resource.remove_amount(Decimal(str(trade.gives_amount)))
+
+        # Unlock the new emotion
+        self.unlock_emotion(template.unlocks_emotion)
+
+        # Add the received resources
+        receiving_resource = self.get_resource(trade.receives_emotion)
+        receiving_resource.add_amount(Decimal(str(trade.receives_amount)))
+
+        # Mark tutorial as completed
+        if template.id not in self.completed_tutorials:
+            self.completed_tutorials.append(template.id)
+
+        # Clear pending customer
+        self.pending_tutorial_customer = None
+
+        # Increment customers served
+        self.customers_served += 1
+
+        # Trigger resource update for reactivity
+        self.resources = dict(self.resources)
+
+        return True
 
     def reset_for_prestige(self) -> int:
         """Reset the game state for prestige, calculating Emotional Depth gained.

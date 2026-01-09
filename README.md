@@ -2,9 +2,13 @@
 
 A terminal-based idle game where you trade in the economy of feelings. Extract emotions from experiences, refine them into pure essence, and serve customers seeking specific emotional states.
 
+Built with [Textual](https://textual.textualize.io/) - a modern Python framework for creating sophisticated terminal user interfaces with reactive programming.
+
 ## A notice about vibe coding
 
 This is mostly a vibe coded experimental project in my spare time, investigating how to solve ideas for side projects in new technology. The primary focus here is to mess around with python, the terminal, and game design in general. A _vast_ majority of the code written at this time is not written by me.
+
+**Project Restart (January 2026)**: This project was completely restarted from scratch using the latest Textual framework and modern idle game design principles. All previous implementation work was removed; only the game design documentation was retained.
 
 ## Quick Start
 
@@ -21,11 +25,11 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 ```bash
 # Clone and setup (installs all dependencies automatically)
 git clone <repository>
-cd idle-tui
+cd namless-idle-tui
 uv sync --all-extras
 
 # Run in terminal
-uv run python -m src.idle_game.app
+uv run python src/idle_game/app.py
 ```
 
 ### Web Version
@@ -37,7 +41,7 @@ The app can also run in your browser using Textual's web server:
 uv sync --all-extras
 
 # Run web server
-uv run textual serve --port 8080 src.idle_game.app:IdleGame
+uv run textual serve --port 8080 src.idle_game.app:IdleGameApp
 
 # Open http://localhost:8080 in your browser
 ```
@@ -71,19 +75,27 @@ In Emotion Merchant, you:
 
 ## Game Controls
 
-### Terminal Version
+### Keyboard Shortcuts
 
-- **Click/Space** - Harvest smiles
-- **s** - Save game (auto-saves every 10s)
-- **r** - Reset progress
-- **q** - Quit
-- **Tab** - Navigate UI elements
+- **q** - Quit game (saves automatically)
+- **s** - Save game manually (auto-saves every 10s)
+- **p** or **Escape** - Pause/Resume game
+- **a** - Open Alchemy screen
+- **c** - Open Customers screen
+- **m** - Open Market/Shop screen
+- **?** - Show help
+- **Tab** - Navigate to next UI element
+- **Shift+Tab** - Navigate to previous UI element
+
+### Mouse Controls
+
+- **Click** "☺ Harvest Smiles ☺" button - Manually harvest smiles
+- **Click** "Buy" buttons - Purchase producers/buildings
+- Click any interactive element in the TUI
 
 ### Web Version
 
-- **Click button** - Harvest smiles
-- All keyboard shortcuts work the same as terminal version
-- Runs in any modern browser without installation
+All keyboard and mouse controls work the same when running via `textual serve`. The game runs in any modern browser without installation.
 
 ## Documentation
 
@@ -94,19 +106,86 @@ In Emotion Merchant, you:
 
 ## Current Features
 
-✅ Basic clicking and idle progression  
-✅ Persistent saves with offline progress  
-✅ Large number formatting  
-✅ Terminal and web support  
-⏳ Emotion storage system  
-⏳ Customer interactions  
-⏳ Alchemy and recipes  
-⏳ Shop and upgrades  
+### ✅ Implemented
+
+- **Core Game Engine**
+  - Decimal-precision math for accurate calculations
+  - Delta-time based game loop (10 FPS, frame-rate independent)
+  - Save/load system with JSON persistence
+  - Offline progression calculation
+  - All 10 emotion tiers defined (Smiles → Singularity)
+
+- **TUI Interface**
+  - Three-panel layout (Resources | Actions | Statistics)
+  - Reactive UI with automatic updates
+  - Resource display with amount, capacity, purity, production rate
+  - Producer/building purchase buttons
+  - Click harvesting with power display
+  - Lock/unlock system for progressive content
+  - Beautiful styling with Textual CSS
+
+- **Game Mechanics**
+  - Manual clicking to harvest Smiles
+  - Producer buildings (exponential cost scaling)
+  - Passive resource generation
+  - Resource storage with capacity limits
+  - Purity tracking system
+  - Statistics display (playtime, total clicks, etc.)
+  - Pause/resume functionality
+
+### ⏳ In Progress
+
+- Tutorial customer triggers (first 5 milestone customers)
+- Customer queue and service interface
+- Alchemy mixing and recipe system
+- Shop upgrades and perks
+- Prestige system with Emotional Depth
+
+### 📋 Planned
+
+- Story customer arcs with branching narratives
+- Empathy mode mechanic
+- Ethical choice system
+- Special/VIP customers
+- Advanced alchemy recipes
+- Multiple prestige endings
 
 ## Project Status
 
-**Phase: Early Development**  
-Currently implementing core emotion harvesting and storage systems. The basic idle game loop is functional with saves and offline progression.
+**Phase: Core Implementation Complete**
+
+The project was completely restarted in January 2026 using modern Textual framework and idle game design principles. The core game loop is now functional with:
+
+- ✅ Full TUI interface with reactive updates
+- ✅ Click harvesting and passive production
+- ✅ Producer purchase system with exponential scaling
+- ✅ Save/load with offline progression
+- ✅ All 10 emotion tiers implemented
+
+**Next Steps:**
+1. Wire tutorial customer triggers to unlock progression
+2. Integrate customer queue and service interface
+3. Connect alchemy mixing system
+4. Add shop/upgrade mechanics
+5. Implement prestige reset system
+
+## Architecture
+
+The game is built using:
+
+- **Textual 1.0+** - Modern TUI framework with reactive programming
+- **Message-Based Architecture** - Widget communication via custom messages
+- **Centralized State** - Single GameState instance with reactive attributes
+- **Decimal Precision** - Accurate math for large numbers
+- **Delta-Time Game Loop** - Frame-rate independent updates at 10 FPS
+- **JSON Persistence** - Simple save/load system with version migration
+
+Key modules:
+- `src/idle_game/data/` - Emotion definitions and game constants
+- `src/idle_game/models/` - Game state, resources, recipes
+- `src/idle_game/engine/` - Game loop, save manager, calculators
+- `src/idle_game/screens/` - TUI screens (game, alchemy, customers)
+- `src/idle_game/widgets/` - Reusable UI components
 
 ## License
 

@@ -106,6 +106,78 @@ class IdleGameApp(App[None]):
             # Update game logic
             self.game_loop.update(delta_time)
 
+            # Update playtime
+            self.game_state.total_playtime += delta_time
+
+            # Check for tutorial customer triggers
+            self._check_tutorial_customer()
+
+            # Refresh UI (only update every 10 ticks to reduce overhead)
+            if not hasattr(self, '_tick_count'):
+                self._tick_count = 0
+            self._tick_count += 1
+            if self._tick_count % 10 == 0:
+                self._refresh_ui()
+
+    def _refresh_ui(self) -> None:
+        """Refresh the game UI from game state."""
+        try:
+            game_screen = self.screen
+            if isinstance(game_screen, GameScreen):
+                game_screen.refresh_resources()
+                game_screen.refresh_action_buttons()
+        except Exception:
+            pass  # Silently fail if screen not ready
+
+    def _check_tutorial_customer(self) -> None:
+        """Check for and handle pending tutorial customers."""
+        if self.game_state.pending_tutorial_customer is None:
+            return
+
+        tutorial_customer = self.game_state.pending_tutorial_customer
+        template = tutorial_customer.template
+
+        if not template:
+            self.game_state.pending_tutorial_customer = None
+            return
+
+        # Show notification about the customer
+        trade_desc = (
+            f"{template.trade.gives_amount} {template.trade.gives_emotion.title()} → "
+            f"{template.trade.receives_amount} {template.trade.receives_emotion.title()}"
+        )
+
+        self.notify(
+            f"🎉 {template.name} arrives!\n"
+            f"{template.dialogue}\n"
+            f"Trade: {trade_desc}",
+            title="New Customer!",
+            severity="information",
+            timeout=10
+        )
+
+        # Auto-execute the tutorial trade
+        success = self.game_state.execute_tutorial_trade(tutorial_customer)
+
+        if success:
+            self.notify(
+                f"✨ {template.unlocks_description}",
+                title="Emotion Unlocked!",
+                severity="information",
+                timeout=8
+            )
+            # Refresh UI to show newly unlocked emotion
+            self._refresh_ui()
+        else:
+            # This shouldn't happen as the trigger checks for sufficient resources
+            self.notify(
+                "Trade failed: Not enough resources!",
+                severity="error",
+                timeout=5
+            )
+            # Clear the pending customer anyway
+            self.game_state.pending_tutorial_customer = None
+
     # Action handlers
 
     def action_quit(self) -> None:

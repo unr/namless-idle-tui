@@ -10,6 +10,7 @@ from typing import Optional
 
 from src.idle_game.models.game_state import GameState
 from src.idle_game.models.resources import ResourceCalculator
+from src.idle_game.models.customer import CustomerGenerator
 from src.idle_game.data.emotions import get_emotion
 
 
@@ -29,6 +30,11 @@ class GameLoop:
         self.game_state = game_state
         self.accumulated_time = 0.0
 
+        # Customer generator for tutorial triggers
+        self.customer_generator = CustomerGenerator(
+            unlocked_emotions=list(game_state.unlocked_emotions)
+        )
+
     def update(self, delta_time: float) -> None:
         """Main update method called each frame.
 
@@ -46,6 +52,7 @@ class GameLoop:
         self.apply_passive_generation(delta_time)
         self.apply_purity_decay(delta_time)
         self.check_storage_capacity()
+        self.check_tutorial_milestones()
 
     def apply_passive_generation(self, delta_time: float) -> None:
         """Apply passive resource generation based on producers.
@@ -145,6 +152,28 @@ class GameLoop:
 
         # Trigger reactivity update if any overflow occurred
         self.game_state.resources = dict(self.game_state.resources)
+
+    def check_tutorial_milestones(self) -> None:
+        """Check if any tutorial customers should trigger based on resource milestones."""
+        # Only check if no tutorial customer is currently pending
+        if self.game_state.pending_tutorial_customer is not None:
+            return
+
+        # Get current resource amounts as floats for comparison
+        resource_amounts = {
+            emotion_type: float(resource.amount)
+            for emotion_type, resource in self.game_state.resources.items()
+        }
+
+        # Check if any tutorial should trigger
+        tutorial_customer = self.customer_generator.check_tutorial_trigger(
+            resources=resource_amounts,
+            completed_tutorials=self.game_state.completed_tutorials
+        )
+
+        if tutorial_customer:
+            # Set pending tutorial customer to trigger notification in app
+            self.game_state.pending_tutorial_customer = tutorial_customer
 
     def get_production_rate(self, emotion_type: str) -> Decimal:
         """Get the current production rate for an emotion type.

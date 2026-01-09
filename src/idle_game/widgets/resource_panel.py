@@ -272,3 +272,24 @@ class ResourcePanel(Widget):
             name: Name of the emotion to unlock
         """
         self.update_resource(name, is_locked=False, amount=Decimal(0))
+
+    def update_from_game_state(self) -> None:
+        """Update all resource displays from game state."""
+        if not self.game_state:
+            return
+
+        # Update each resource from game_state.resources
+        for emotion_name, emotion_resource in self.game_state.resources.items():
+            # Calculate production rate using game loop
+            production_rate = Decimal(0)
+            if self.game_loop:
+                production_rate = self.game_loop.get_production_rate(emotion_name)
+
+            self.update_resource(
+                name=emotion_name,
+                amount=emotion_resource.amount,
+                capacity=emotion_resource.capacity,
+                purity=emotion_resource.purity,
+                production_rate=production_rate,
+                is_locked=(emotion_name not in self.game_state.unlocked_emotions)
+            )
