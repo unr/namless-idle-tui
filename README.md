@@ -58,6 +58,32 @@ In Emotion Merchant, you:
 - **Manage** purity, storage, and ethical choices
 - **Progress** through 10 tiers of emotional complexity
 
+## Screenshots
+
+### Fresh Start
+![Game Start](docs/screenshots/01_game_start.svg)
+*The game begins with just Smiles - click to harvest your first emotions!*
+
+### Early Game - After Clicking
+![After Clicking](docs/screenshots/02_after_clicking.svg)
+*After harvesting enough Smiles, tutorial customers will appear to unlock new emotions.*
+
+### Mid Game - Joy Unlocked
+![Joy Unlocked](docs/screenshots/03_joy_unlocked.svg)
+*With Joy unlocked, you can purchase Joy producers that passively generate Smiles.*
+
+### Upgrade Shop
+![Shop Screen](docs/screenshots/04_shop_screen.svg)
+*Visit the shop to purchase upgrades that boost click power, production, and storage.*
+
+### Prestige System
+![Prestige Screen](docs/screenshots/05_prestige_screen.svg)
+*When ready, perform Emotional Rebirth to gain permanent bonuses through Emotional Depth.*
+
+### Advanced Gameplay
+![Advanced Gameplay](docs/screenshots/06_advanced_gameplay.svg)
+*With multiple emotions unlocked, manage your production chains and resource flows.*
+
 ## Core Resources
 
 | Tier | Resource | Cost | Production | Symbol |
@@ -133,13 +159,18 @@ All keyboard and mouse controls work the same when running via `textual serve`. 
   - Statistics display (playtime, total clicks, etc.)
   - Pause/resume functionality
 
+- **Progression Systems**
+  - Tutorial customer triggers (5 milestone-based customers)
+  - Shop with 5 upgrade types (click power, production, storage, etc.)
+  - Prestige system with Emotional Depth bonuses
+  - Unlock new emotions through customer trades
+
 ### ⏳ In Progress
 
-- Tutorial customer triggers (first 5 milestone customers)
 - Customer queue and service interface
 - Alchemy mixing and recipe system
-- Shop upgrades and perks
-- Prestige system with Emotional Depth
+- Advanced customer types (VIP, Desperate, Addicted)
+- Story customer arcs
 
 ### 📋 Planned
 
@@ -152,22 +183,31 @@ All keyboard and mouse controls work the same when running via `textual serve`. 
 
 ## Project Status
 
-**Phase: Core Implementation Complete**
+**Phase: MVP Complete - Playable Idle Game**
 
-The project was completely restarted in January 2026 using modern Textual framework and idle game design principles. The core game loop is now functional with:
+The project was completely restarted in January 2026 using modern Textual framework and idle game design principles. The game now has all core systems implemented:
 
 - ✅ Full TUI interface with reactive updates
 - ✅ Click harvesting and passive production
 - ✅ Producer purchase system with exponential scaling
 - ✅ Save/load with offline progression
 - ✅ All 10 emotion tiers implemented
+- ✅ Tutorial customer progression system
+- ✅ Shop with 5 upgrade types
+- ✅ Prestige system with Emotional Depth
+
+**Completed Features:**
+- Core idle game loop with delta-time calculations
+- Tutorial customers that trigger at resource milestones
+- Upgrade shop for permanent improvements
+- Prestige system for long-term progression
+- Save/load persistence with offline gains
 
 **Next Steps:**
-1. Wire tutorial customer triggers to unlock progression
-2. Integrate customer queue and service interface
-3. Connect alchemy mixing system
-4. Add shop/upgrade mechanics
-5. Implement prestige reset system
+1. Implement customer queue and service interface
+2. Add alchemy mixing and recipe discovery
+3. Create story customer arcs
+4. Add market fluctuations and events
 
 ## Architecture
 
