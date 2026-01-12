@@ -288,7 +288,7 @@ class ResourcePanel(Widget):
             self.update_resource(
                 name=emotion_name,
                 amount=emotion_resource.amount,
-                capacity=emotion_resource.capacity,
+                capacity=emotion_resource.storage_capacity,
                 purity=emotion_resource.purity,
                 production_rate=production_rate,
                 is_locked=(emotion_name not in self.game_state.unlocked_emotions)
