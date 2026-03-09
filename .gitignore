@@ -64,3 +64,11 @@ data/*.sqlite
 
 # Logs
 *.log
+# Go binaries
+emotion-merchant
+*.exe
+*.test
+*.out
+
+# Game saves
+.emotion-merchant/
